@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import FlowerGrid from '../components/FlowerGrid';
+import '../App.css';
 
 const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
   const [formData, setFormData] = useState({
@@ -73,6 +74,7 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
           image: ''
         });
         setImagePreview(null);
+        alert(result.message || 'Bunga berhasil ditambahkan!');
       }
     } catch (error) {
       console.error('Error adding flower:', error);
@@ -97,8 +99,8 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
           <div style={styles.formCard}>
             <h3 style={styles.formTitle}>➕ Tambah Bunga Baru</h3>
             <form onSubmit={handleSubmit} style={styles.form}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>
+              <div className="form-group">
+                <label className="form-label">
                   Nama Bunga <span style={styles.required}>*</span>
                 </label>
                 <input
@@ -106,22 +108,22 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  style={styles.input}
+                  className="form-input"
                   placeholder="Contoh: Buket Mawar Merah"
                   required
                   disabled={isSubmitting}
                 />
               </div>
               
-              <div style={styles.formGroup}>
-                <label style={styles.label}>
+              <div className="form-group">
+                <label className="form-label">
                   Deskripsi <span style={styles.required}>*</span>
                 </label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  style={styles.textarea}
+                  className="form-textarea"
                   rows="3"
                   placeholder="Deskripsi detail tentang bunga..."
                   required
@@ -129,8 +131,8 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
                 />
               </div>
               
-              <div style={styles.formGroup}>
-                <label style={styles.label}>
+              <div className="form-group">
+                <label className="form-label">
                   Harga (Rp) <span style={styles.required}>*</span>
                 </label>
                 <input
@@ -138,7 +140,7 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
                   name="price"
                   value={formData.price}
                   onChange={handleChange}
-                  style={styles.input}
+                  className="form-input"
                   min="1000"
                   step="1000"
                   placeholder="Contoh: 150000"
@@ -147,8 +149,8 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
                 />
               </div>
               
-              <div style={styles.formGroup}>
-                <label style={styles.label}>
+              <div className="form-group">
+                <label className="form-label">
                   Gambar Bunga
                 </label>
                 <div style={styles.fileUpload}>
@@ -166,12 +168,12 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
                   <p style={styles.fileHint}>Format: JPG, PNG (Maks 2MB)</p>
                 </div>
                 {imagePreview && (
-                  <div style={styles.imagePreview}>
+                  <div className="image-preview">
                     <p style={styles.previewText}>Preview:</p>
                     <img 
                       src={imagePreview} 
                       alt="Preview" 
-                      style={styles.previewImage}
+                      className="preview-image"
                     />
                   </div>
                 )}
@@ -185,7 +187,7 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
               >
                 {isSubmitting ? (
                   <>
-                    <span style={styles.spinner}></span> Menyimpan...
+                    <span className="button-spinner"></span> Menyimpan...
                   </>
                 ) : (
                   '💾 Simpan Bunga'
@@ -226,13 +228,23 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
             isAdmin={true}
             onDelete={onDeleteFlower}
           />
+          
+          <div style={styles.adminNotes}>
+            <h4>📝 Catatan Admin:</h4>
+            <ul style={styles.notesList}>
+              <li>Bunga yang ditambahkan akan langsung terlihat oleh pelanggan</li>
+              <li>Bunga yang dihapus akan hilang dari tampilan pelanggan</li>
+              <li>Data disimpan secara otomatis di database</li>
+              <li>Gambar akan dikonversi ke format base64</li>
+            </ul>
+          </div>
         </section>
       </div>
     </main>
   );
 };
 
-// Styles tetap sama seperti sebelumnya
+// Styles object - Hanya untuk layout yang spesifik
 const styles = {
   container: {
     paddingTop: '30px',
@@ -244,7 +256,7 @@ const styles = {
     color: '#333',
     marginBottom: '30px',
     paddingBottom: '15px',
-    borderBottom: '2px solid #2e7d32',
+    borderBottom: '2px solid var(--primary-green)',
   },
   adminLayout: {
     display: 'grid',
@@ -273,36 +285,9 @@ const styles = {
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '20px',
-  },
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  label: {
-    marginBottom: '8px',
-    color: '#555',
-    fontWeight: '500',
-    fontSize: '0.95rem',
   },
   required: {
-    color: '#f44336',
-  },
-  input: {
-    padding: '12px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    fontSize: '0.95rem',
-    transition: 'border-color 0.3s ease',
-  },
-  textarea: {
-    padding: '12px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    fontSize: '0.95rem',
-    resize: 'vertical',
-    minHeight: '80px',
-    transition: 'border-color 0.3s ease',
+    color: 'var(--danger-red)',
   },
   fileUpload: {
     marginTop: '5px',
@@ -319,46 +304,23 @@ const styles = {
     fontSize: '0.9rem',
     transition: 'background-color 0.3s ease',
   },
+  fileLabelHover: {
+    backgroundColor: '#e0e0e0',
+  },
   fileHint: {
     fontSize: '0.85rem',
     color: '#666',
     marginTop: '5px',
-  },
-  imagePreview: {
-    marginTop: '15px',
-    padding: '10px',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '6px',
-    border: '1px dashed #ddd',
   },
   previewText: {
     fontSize: '0.9rem',
     color: '#666',
     marginBottom: '8px',
   },
-  previewImage: {
-    width: '100%',
-    maxHeight: '150px',
-    objectFit: 'contain',
-    borderRadius: '4px',
-  },
   submitBtn: {
     padding: '12px',
     fontSize: '1rem',
     fontWeight: '600',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '8px',
-  },
-  spinner: {
-    display: 'inline-block',
-    width: '16px',
-    height: '16px',
-    border: '2px solid #fff',
-    borderTop: '2px solid transparent',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
   },
   statsCard: {
     backgroundColor: 'white',
@@ -379,7 +341,7 @@ const styles = {
   statNumber: {
     fontSize: '1.8rem',
     fontWeight: 'bold',
-    color: '#2e7d32',
+    color: 'var(--primary-green)',
   },
   statLabel: {
     fontSize: '0.9rem',
@@ -409,15 +371,32 @@ const styles = {
     fontSize: '0.95rem',
     color: '#666',
   },
+  adminNotes: {
+    backgroundColor: '#e8f5e9',
+    padding: '20px',
+    borderRadius: '12px',
+    borderLeft: '4px solid var(--primary-green)',
+  },
+  notesList: {
+    listStyleType: 'none',
+    padding: 0,
+    marginTop: '10px',
+  },
+  notesListLi: {
+    padding: '5px 0',
+    fontSize: '0.9rem',
+    color: '#555',
+    display: 'flex',
+    alignItems: 'flex-start',
+  },
+  notesListLiBefore: {
+    content: '"•"',
+    color: 'var(--primary-green)',
+    fontWeight: 'bold',
+    display: 'inline-block',
+    width: '1em',
+    marginRight: '10px',
+  },
 };
-
-// Tambahkan animasi spinner di CSS global
-const styleSheet = document.styleSheets[0];
-styleSheet.insertRule(`
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-`, styleSheet.cssRules.length);
 
 export default Admin;
