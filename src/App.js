@@ -5,20 +5,25 @@ import Header from './components/Header';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
 
+// Base URL untuk API
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? '/.netlify/functions' 
+  : 'http://localhost:8888/.netlify/functions';
+
 function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [flowers, setFlowers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch flowers from database
+  // Fetch flowers dari database
   const fetchFlowers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/.netlify/functions/flowers');
+      const response = await axios.get(`${API_URL}/flowers`);
       setFlowers(response.data);
     } catch (error) {
       console.error('Error fetching flowers:', error);
-      // Fallback jika API error
+      // Fallback ke localStorage jika API error
       const saved = localStorage.getItem('teras-rumah-flowers');
       if (saved) setFlowers(JSON.parse(saved));
     } finally {
@@ -30,8 +35,9 @@ function App() {
     fetchFlowers();
   }, []);
 
+  // GANTI: Username: rischa, Password: terasrumah123
   const handleLogin = (username, password) => {
-    if (username === 'admin' && password === 'admin123') {
+    if (username === 'rischa' && password === 'terasrumah123') {
       setIsAdmin(true);
       return true;
     }
@@ -44,15 +50,16 @@ function App() {
 
   const addFlower = async (flower) => {
     try {
-      const response = await axios.post('/.netlify/functions/flowers', {
+      const response = await axios.post(`${API_URL}/flowers`, {
         ...flower,
-        adminKey: 'admin123'
+        adminKey: 'terasrumah123' // GANTI adminKey
       });
 
       if (response.data.success) {
-        fetchFlowers(); // Refresh list
+        fetchFlowers();
         return { success: true, message: 'Bunga berhasil ditambahkan!' };
       }
+      return { success: false, message: 'Gagal menambahkan bunga' };
     } catch (error) {
       console.error('Error adding flower:', error);
       // Fallback ke localStorage
@@ -70,10 +77,10 @@ function App() {
 
   const deleteFlower = async (id) => {
     try {
-      await axios.delete(`/.netlify/functions/flowers?id=${id}`, {
-        data: { adminKey: 'admin123' }
+      await axios.delete(`${API_URL}/flowers?id=${id}`, {
+        data: { adminKey: 'terasrumah123' } // GANTI adminKey
       });
-      fetchFlowers(); // Refresh list
+      fetchFlowers();
       return { success: true, message: 'Bunga berhasil dihapus!' };
     } catch (error) {
       console.error('Error deleting flower:', error);
@@ -87,7 +94,7 @@ function App() {
 
   const addComment = async (flowerId, comment) => {
     try {
-      const response = await axios.post('/.netlify/functions/comments', {
+      const response = await axios.post(`${API_URL}/comments`, {
         flowerId,
         author: comment.author,
         text: comment.text,
@@ -95,7 +102,6 @@ function App() {
       });
 
       if (response.data.success) {
-        // Update local state
         setFlowers(prevFlowers => 
           prevFlowers.map(flower => {
             if (flower.id === flowerId) {
@@ -111,7 +117,6 @@ function App() {
       }
     } catch (error) {
       console.error('Error adding comment:', error);
-      // Fallback
       setFlowers(prevFlowers => 
         prevFlowers.map(flower => {
           if (flower.id === flowerId) {
