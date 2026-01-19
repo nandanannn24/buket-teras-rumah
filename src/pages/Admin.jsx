@@ -12,6 +12,7 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
 
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadError, setUploadError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,9 +24,25 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
+    setUploadError(''); // Reset error
+    
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert('Ukuran gambar maksimal 2MB');
+      // Validasi ukuran file (max 100MB = 100 * 1024 * 1024 bytes)
+      const maxSize = 100 * 1024 * 1024; // 100MB
+      
+      if (file.size > maxSize) {
+        setUploadError('Ukuran gambar terlalu besar. Maksimal 100MB.');
+        e.target.value = ''; // Reset input file
+        setImagePreview(null);
+        return;
+      }
+
+      // Validasi tipe file
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        setUploadError('Format gambar tidak didukung. Gunakan JPG, PNG, WebP, atau GIF.');
+        e.target.value = '';
+        setImagePreview(null);
         return;
       }
 
@@ -36,7 +53,15 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
           image: reader.result
         }));
         setImagePreview(reader.result);
+        setUploadError('');
       };
+      
+      reader.onerror = () => {
+        setUploadError('Gagal membaca file gambar. Coba lagi.');
+        e.target.value = '';
+        setImagePreview(null);
+      };
+      
       reader.readAsDataURL(file);
     }
   };
@@ -54,6 +79,10 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
     }
     if (!formData.price || parseInt(formData.price) <= 0) {
       alert('Harga harus diisi dengan angka positif');
+      return;
+    }
+    if (!formData.image) {
+      alert('Gambar bunga harus diupload');
       return;
     }
 
@@ -74,6 +103,7 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
           image: ''
         });
         setImagePreview(null);
+        setUploadError('');
         alert(result.message || 'Bunga berhasil ditambahkan!');
       }
     } catch (error) {
@@ -84,7 +114,6 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
     }
   };
 
-  // Pastikan flowers selalu array
   const safeFlowers = Array.isArray(flowers) ? flowers : [];
   const totalComments = safeFlowers.reduce((total, flower) => {
     return total + (Array.isArray(flower.comments) ? flower.comments.length : 0);
@@ -151,12 +180,12 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
               
               <div className="form-group">
                 <label className="form-label">
-                  Gambar Bunga
+                  Gambar Bunga <span style={styles.required}>*</span>
                 </label>
                 <div style={styles.fileUpload}>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                     onChange={handleImageUpload}
                     style={styles.fileInput}
                     id="flower-image"
@@ -165,16 +194,43 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
                   <label htmlFor="flower-image" style={styles.fileLabel}>
                     📷 {imagePreview ? 'Ganti Gambar' : 'Pilih Gambar'}
                   </label>
-                  <p style={styles.fileHint}>Format: JPG, PNG (Maks 2MB)</p>
+                  <p style={styles.fileHint}>
+                    Format: JPG, PNG, WebP, GIF (Maksimal 100MB)
+                  </p>
                 </div>
+                
+                {uploadError && (
+                  <div style={styles.errorBox}>
+                    <span style={styles.errorIcon}>⚠️</span>
+                    <span style={styles.errorText}>{uploadError}</span>
+                  </div>
+                )}
+                
                 {imagePreview && (
                   <div className="image-preview">
-                    <p style={styles.previewText}>Preview:</p>
+                    <div style={styles.previewHeader}>
+                      <p style={styles.previewText}>Preview:</p>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setImagePreview(null);
+                          setFormData(prev => ({ ...prev, image: '' }));
+                          document.getElementById('flower-image').value = '';
+                        }}
+                        style={styles.removePreview}
+                        disabled={isSubmitting}
+                      >
+                        Hapus
+                      </button>
+                    </div>
                     <img 
                       src={imagePreview} 
                       alt="Preview" 
                       className="preview-image"
                     />
+                    <p style={styles.fileSizeInfo}>
+                      Ukuran file: {Math.round((formData.image.length * 3) / 4 / 1024 / 1024 * 100) / 100} MB
+                    </p>
                   </div>
                 )}
               </div>
@@ -183,7 +239,7 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
                 type="submit" 
                 className="btn btn-primary" 
                 style={styles.submitBtn}
-                disabled={isSubmitting}
+                disabled={isSubmitting || uploadError}
               >
                 {isSubmitting ? (
                   <>
@@ -232,10 +288,10 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
           <div style={styles.adminNotes}>
             <h4>📝 Catatan Admin:</h4>
             <ul style={styles.notesList}>
-              <li>Bunga yang ditambahkan akan langsung terlihat oleh pelanggan</li>
-              <li>Bunga yang dihapus akan hilang dari tampilan pelanggan</li>
-              <li>Data disimpan secara otomatis di database</li>
-              <li>Gambar akan dikonversi ke format base64</li>
+              <li>Gambar maksimal 100MB. Format: JPG, PNG, WebP, GIF</li>
+              <li>Gambar yang besar akan dikompresi otomatis oleh browser</li>
+              <li>Disarankan ukuran gambar di bawah 5MB untuk performa terbaik</li>
+              <li>Data disimpan di database cloud dan bisa diakses semua pengguna</li>
             </ul>
           </div>
         </section>
@@ -244,7 +300,6 @@ const Admin = ({ flowers = [], onAddFlower, onDeleteFlower }) => {
   );
 };
 
-// Styles object - Hanya untuk layout yang spesifik
 const styles = {
   container: {
     paddingTop: '30px',
@@ -302,7 +357,8 @@ const styles = {
     borderRadius: '6px',
     cursor: 'pointer',
     fontSize: '0.9rem',
-    transition: 'background-color 0.3s ease',
+    transition: 'all 0.3s ease',
+    border: '1px solid #ddd',
   },
   fileLabelHover: {
     backgroundColor: '#e0e0e0',
@@ -312,10 +368,54 @@ const styles = {
     color: '#666',
     marginTop: '5px',
   },
+  errorBox: {
+    backgroundColor: '#ffebee',
+    padding: '10px 15px',
+    borderRadius: '6px',
+    marginTop: '10px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    borderLeft: '4px solid var(--danger-red)',
+  },
+  errorIcon: {
+    fontSize: '1.2rem',
+  },
+  errorText: {
+    color: '#c62828',
+    fontSize: '0.9rem',
+    flex: 1,
+  },
+  previewHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '8px',
+  },
   previewText: {
     fontSize: '0.9rem',
     color: '#666',
-    marginBottom: '8px',
+  },
+  removePreview: {
+    background: 'none',
+    border: '1px solid #ddd',
+    color: '#666',
+    padding: '4px 10px',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '0.8rem',
+    transition: 'all 0.3s ease',
+  },
+  removePreviewHover: {
+    backgroundColor: '#f5f5f5',
+    borderColor: '#999',
+  },
+  fileSizeInfo: {
+    fontSize: '0.8rem',
+    color: '#888',
+    marginTop: '8px',
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   submitBtn: {
     padding: '12px',
