@@ -332,3 +332,77 @@ body {
 .close-button:hover {
   background-color: #f5f5f5;
 }
+
+/* Tambahkan di bagian File Upload Styles */
+
+/* File Upload Custom */
+.file-upload-container {
+  margin-top: 10px;
+}
+
+.file-input-label {
+  display: inline-block;
+  padding: 12px 20px;
+  background-color: #f0f0f0;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  text-align: center;
+  width: 100%;
+}
+
+.file-input-label:hover {
+  background-color: #e8f5e9;
+  border-color: var(--primary-green);
+}
+
+.file-hint {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 5px;
+  text-align: center;
+}
+
+/* Image Preview Styles */
+.image-preview-container {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.preview-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.remove-preview-btn {
+  background: none;
+  border: 1px solid #ddd;
+  color: #666;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.remove-preview-btn:hover {
+  background-color: #f5f5f5;
+  border-color: #999;
+}
+
+.file-size-badge {
+  display: inline-block;
+  background-color: #e8f5e9;
+  color: var(--primary-green);
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  margin-top: 8px;
+}
